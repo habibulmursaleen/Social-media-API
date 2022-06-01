@@ -24,7 +24,7 @@ class Post(BaseModel):
     published: bool  = True 
     rating: Optional[int] = None 
 
-#Connection with existing Database
+#Connection with existing Databases
 while True:
     try: 
         conn = psycopg2.connect(host='localhost', database= 'FastAPI', user= 'postgres', password='password', cursor_factory=RealDictCursor)
