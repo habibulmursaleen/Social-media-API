@@ -27,7 +27,8 @@ class Post(BaseModel):
 #Connection with existing Database 
 while True:
     try: 
-        conn = psycopg2.connect(host='localhost', database= 'FastAPI', user= 'postgres', password='password', cursor_factory=RealDictCursor)
+        conn = psycopg2.connect(host='localhost', database= 'FastAPI', user= 'postgres', 
+                                password='password', cursor_factory=RealDictCursor)
 
     #Open a cursor to perform database operations (SQL statement)
         cur = conn.cursor()
@@ -36,36 +37,8 @@ while True:
     except Exception as error: 
         print("Database Connection Failed")
         print("Error : ", error) 
-        time.sleep(2) #for break for 2 seconds and re-try to connect database in the while loop until is finds the connection and break the while loop. 
-
-#Static Database
-myPosts = [
-    {
-    "id": 1,
-    "title": "title of post 1",
-    "content": "content of post 1",
-    "published": True,
-    "rating": 4 
-    },
-
-    {
-    "id": 2,
-    "title": "title of post 2",
-    "content": "content of post 2", 
-    "published": True,
-    "rating": 3
-    }
-]
-
-def find_post(id): 
-    for p in myPosts: 
-        if p["id"] == id: 
-            return p
-
-def find_index_post(id): 
-    for i, p in enumerate(myPosts): 
-        if p["id"] == id: 
-            return i
+        time.sleep(2) #for break for 2 seconds and re-try to connect database in the-
+                        #-while loop until is finds the connection and break the while loop. 
 
 #path operation/route 
 @app.get("/")
@@ -88,7 +61,8 @@ def get_post():
 #Create Post
 @app.post("/posts", status_code=status.HTTP_201_CREATED)
 def create_post(post: Post):
-    cur.execute("""INSERT INTO posts (title, content, published) VALUES (%s, %s, %s) RETURNING * """, (post.title, post.content, post.published)) #order matters 
+    cur.execute("""INSERT INTO posts (title, content, published) VALUES (%s, %s, %s) RETURNING * """, 
+                (post.title, post.content, post.published)) #order matters 
     new_posts = cur.fetchone()
 
     #anytime we make a change to the database, we need to commit to it  
@@ -115,7 +89,8 @@ def get_one_post(id: int):
 @app.put("/posts/{id}")
 def update_post(id: int, post:Post):
 
-    cur.execute("""UPDATE posts SET title = %s, content= %s, published= %s WHERE id = %s RETURNING * """, (post.title, post.content, post.published, str(id))) #order matters 
+    cur.execute("""UPDATE posts SET title = %s, content= %s, published= %s WHERE id = %s RETURNING * """, 
+                (post.title, post.content, post.published, str(id))) #order matters 
     updated_post = cur.fetchone()
     #anytime we make a change to the database, we need to commit to it  
     conn.commit()
