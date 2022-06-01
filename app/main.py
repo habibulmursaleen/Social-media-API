@@ -53,27 +53,29 @@ def test_posts(db: Session = Depends(get_db)):
 
 #All Post Retrive 
 @app.get("/posts")
-def get_post():
-    cur.execute("""SELECT * FROM posts """)
-    posts = cur.fetchall()
+def get_post(db: Session = Depends(get_db)):
+    
+    posts = db.query(models.Post).all()
+    #cur.execute("""SELECT * FROM posts """)
+    #posts = cur.fetchall()
     return {"data": posts}
 
 #Create Post
 @app.post("/posts", status_code=status.HTTP_201_CREATED)
-def create_post(post: Post):
-    cur.execute("""INSERT INTO posts (title, content, published) VALUES (%s, %s, %s) RETURNING * """, 
-                (post.title, post.content, post.published)) #order matters 
-    new_posts = cur.fetchone()
-
+def create_post(post: Post, db: Session = Depends(get_db)):
+    
+    
+    #cur.execute("""INSERT INTO posts (title, content, published) VALUES (%s, %s, %s) RETURNING * """, 
+    #            (post.title, post.content, post.published)) #order matters 
+    #new_posts = cur.fetchone()
     #anytime we make a change to the database, we need to commit to it  
-    conn.commit()
+    #conn.commit() 
+    new_posts = models.Post(title=post.title, content=post.content, published=post.published)
+    #anytime we make a change to the database, we need to commit to it 
+    db.add(new_posts)
+    db.commit()
+    db.refresh(new_posts) #retrive the data
     return {"Data": new_posts}
-
-#Latest Post Retrive
-@app.get("/posts/latest")
-def get_latest_post():
-    post = myPosts[len(myPosts)-1]
-    return {"Post Details": post} 
 
 #Single Post Retrive
 @app.get("/posts/{id}")
