@@ -22,8 +22,7 @@ class Post(BaseModel):
     title: str
     content: str 
     published: bool  = True 
-    rating: Optional[int] = None  
-
+    
 #Connection with existing Database 
 while True:
     try: 
@@ -70,7 +69,11 @@ def create_post(post: Post, db: Session = Depends(get_db)):
     #new_posts = cur.fetchone()
     #anytime we make a change to the database, we need to commit to it  
     #conn.commit() 
-    new_posts = models.Post(title=post.title, content=post.content, published=post.published)
+    
+    #new_posts = models.Post(title=post.title, content=post.content, published=post.published)
+    
+    #this is going to uppack the all the fields/columns so we dont have to manually type it out
+    new_posts = models.Post(**post.dict())
     #anytime we make a change to the database, we need to commit to it 
     db.add(new_posts)
     db.commit()
