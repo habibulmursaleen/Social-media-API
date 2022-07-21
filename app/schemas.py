@@ -23,9 +23,10 @@ class UserCreate(BaseModel):
     email: EmailStr 
     password: str 
     
-class UserOut(BaseModel): 
+class UserOut(BaseModel): #response model for not retriving password 
     id: int 
     email: EmailStr
+    created_at: datetime 
     
     class Config:   
         orm_mode = True

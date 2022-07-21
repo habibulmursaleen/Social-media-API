@@ -13,7 +13,10 @@ import time
 from . import models, schemas
 from .database import engine, get_db
 from sqlalchemy.orm import Session  
-from passlib.context import CryptContext
+from passlib.context import CryptContext 
+
+#telling passlib what is the default hashing algorithm which is bcrypt
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 #This is going to create all the models and tables 
 models.Base.metadata.create_all(bind=engine)
@@ -42,10 +45,10 @@ async def root():
     return {"message": "Welcome to my FastAPI!!"}
 
 #SQLalchemy test
-# @app.get("/sqlalchemy")
-# def test_posts(db: Session = Depends(get_db)):
-#     post = db.query(models.Post).all()
-#     return {"data": post}
+@app.get("/sqlalchemy")
+def test_posts(db: Session = Depends(get_db)):
+     posts = db.query(models.Post).all()
+     return {"data": posts}
 
 #All Post Retrive 
 @app.get("/posts", response_model= List[schemas.Post])
@@ -60,7 +63,7 @@ def get_post(db: Session = Depends(get_db)):
 
 #Create Post
 @app.post("/posts", status_code=status.HTTP_201_CREATED, response_model= schemas.Post)
-def create_post(post: schemas.PostCreate, db: Session = Depends(get_db)):
+def create_posts(post: schemas.PostCreate, db: Session = Depends(get_db)):
     
     #cur.execute("""INSERT INTO posts (title, content, published) VALUES (%s, %s, %s) RETURNING * """, 
     #            (post.title, post.content, post.published)) #order matters 
@@ -70,11 +73,11 @@ def create_post(post: schemas.PostCreate, db: Session = Depends(get_db)):
     
     #new_posts = models.Post(title=post.title, content=post.content, published=post.published)
     # (**) this is going to uppack the all the fields/columns so we dont have to manually type it out
-    new_posts = models.Post(**post.dict())
-    db.add(new_posts)
+    new_post = models.Post(**post.dict())
+    db.add(new_post)
     db.commit() # #Commit to DB
-    db.refresh(new_posts) #retrive the data
-    return new_posts
+    db.refresh(new_post) #retrive the data
+    return new_post
 
 #Single Post Retrive
 @app.get("/posts/{id}", response_model= schemas.Post)
@@ -128,17 +131,13 @@ def delete_post(id: int, db: Session = Depends(get_db)):
     
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
-@app.post("/users", status_code=status.HTTP_201_CREATED)
-def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
-    new_user = models.Users(**user.dict())
-    db.add(new_user)
-    db.commit() #Commit to DB
-    db.refresh(new_user) #retrive the data
-    return new_user 
-
 #Create User
-@app.post("/users", status_code=status.HTTP_201_CREATED, response_model= schemas.UserOut)
-def create_User(user: schemas.UserCreate, db: Session = Depends(get_db)):
+@app.post("/users", status_code=status.HTTP_201_CREATED, response_model=schemas.UserOut)
+def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
+    
+    #hash the password - user.password
+    hashed_password = pwd_context.hash(user.password)
+    user.password = hashed_password #this is gonna update pydentic user model
 
     new_user = models.Users(**user.dict())
     db.add(new_user)

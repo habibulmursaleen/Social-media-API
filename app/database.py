@@ -7,9 +7,9 @@ SQLALCHEMY_DATABASE_URL = 'postgresql://postgres:password@localhost/FastAPI'
 
 #responsible to SQLALchamy with Postgres DB 
 engine = create_engine(SQLALCHEMY_DATABASE_URL) #for SQLlite this needs to add ", connect_args={"check_same_thread": False}"
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine) #to talk to DB 
 
-Base = declarative_base()
+Base = declarative_base() 
 
 # Dependency
 def get_db():
