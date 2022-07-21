@@ -10,13 +10,9 @@ from pydantic import BaseModel
 import psycopg2
 from psycopg2.extras import RealDictCursor 
 import time 
-from . import models, schemas
+from . import models, schemas, utils
 from .database import engine, get_db
 from sqlalchemy.orm import Session  
-from passlib.context import CryptContext 
-
-#telling passlib what is the default hashing algorithm which is bcrypt
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 #This is going to create all the models and tables 
 models.Base.metadata.create_all(bind=engine)
@@ -136,7 +132,7 @@ def delete_post(id: int, db: Session = Depends(get_db)):
 def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     
     #hash the password - user.password
-    hashed_password = pwd_context.hash(user.password)
+    hashed_password = utils.hash(user.password)
     user.password = hashed_password #this is gonna update pydentic user model
 
     new_user = models.Users(**user.dict())
@@ -144,3 +140,14 @@ def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     db.commit() # #Commit to DB
     db.refresh(new_user) #retrive the data
     return new_user 
+
+#Get User 
+@app.get("/users/{id}", response_model=schemas.UserOut) #response model is hiding the password
+def get_user(id: int, db: Session = Depends(get_db)):
+    user = db.query(models.Users).filter(models.Users.id == id).first() #works like SQL WHERE. 
+                                                            #.first() bring the first found result instead of all()
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, 
+                            detail=f"User with Id:{id} not found")
+        
+    return user
