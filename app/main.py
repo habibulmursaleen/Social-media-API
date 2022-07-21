@@ -13,6 +13,7 @@ import time
 from . import models, schemas, utils
 from .database import engine, get_db
 from sqlalchemy.orm import Session  
+from .routers import posts, users
 
 #This is going to create all the models and tables 
 models.Base.metadata.create_all(bind=engine)
@@ -34,6 +35,9 @@ while True:
         print("Error : ", error) 
         time.sleep(2) #for break for 2 seconds and re-try to connect database in the-
                         #-while loop until is finds the connection and break the while loop. 
+
+app.include_router(posts.router)
+app.include_router(users.router)
 
 #path operation/route 
 @app.get("/")
