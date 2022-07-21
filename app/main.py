@@ -15,9 +15,6 @@ from .database import engine, get_db
 from sqlalchemy.orm import Session  
 from passlib.context import CryptContext
 
-#telling passlib what is the default  hasing algorithm is. 
-pwd_context = CryptContext(schemes=["bcrypy"], deprecated = "auto") 
-
 #This is going to create all the models and tables 
 models.Base.metadata.create_all(bind=engine)
 
@@ -142,15 +139,9 @@ def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
 #Create User
 @app.post("/users", status_code=status.HTTP_201_CREATED, response_model= schemas.UserOut)
 def create_User(user: schemas.UserCreate, db: Session = Depends(get_db)):
-    
-     #hash the password before putting into DB 
-     #hash the password - hash.password 
-     
-    hased_password = pwd_context.hash(user.password)
-    user.password = hased_password 
-    
+
     new_user = models.Users(**user.dict())
     db.add(new_user)
     db.commit() # #Commit to DB
     db.refresh(new_user) #retrive the data
-    return new_user
+    return new_user 
