@@ -13,7 +13,7 @@ import time
 from . import models, schemas, utils
 from .database import engine, get_db
 from sqlalchemy.orm import Session  
-from .routers import posts, users
+from .routers import posts, users, auth 
 
 #This is going to create all the models and tables 
 models.Base.metadata.create_all(bind=engine)
@@ -38,6 +38,7 @@ while True:
 
 app.include_router(posts.router)
 app.include_router(users.router)
+app.include_router(auth.router)
 
 #path operation/route 
 @app.get("/")

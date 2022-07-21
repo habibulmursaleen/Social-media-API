@@ -30,3 +30,7 @@ class UserOut(BaseModel): #response model for not retriving password
     
     class Config:   
         orm_mode = True
+        
+class UserLogin(BaseModel):  
+    email: EmailStr 
+    password: str 
